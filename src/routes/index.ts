@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { CategoryRoutes } from "../modules/category/category.route";
 import { SettingsRoutes } from "../modules/settings/settings.route";
+import { MenuRoutes } from "../modules/menu/menu.route";
 
 const router = Router();
 
@@ -16,6 +17,10 @@ const moduleRoutes: {
   {
     path: "/categories",
     route: CategoryRoutes,
+  },
+   {
+    path: "/menus",
+    route: MenuRoutes,
   },
 ];
 

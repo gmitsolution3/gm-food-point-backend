@@ -1,9 +1,20 @@
+import { ClientSession } from "mongoose";
+
+import getBusinessDate from "../../utils/getBusinessDate";
+
+import { COUNTER_KEYS } from "./counter.constant";
 import { Counter } from "./counter.model";
 
-const getNextSequence = async (key: string): Promise<number> => {
+const getNextSequence = async (
+  key: keyof typeof COUNTER_KEYS,
+  session?: ClientSession,
+): Promise<number> => {
+  const businessDate = getBusinessDate();
+
   const counter = await Counter.findOneAndUpdate(
     {
-      key,
+      key: COUNTER_KEYS[key],
+      businessDate,
     },
     {
       $inc: {
@@ -14,6 +25,7 @@ const getNextSequence = async (key: string): Promise<number> => {
       new: true,
       upsert: true,
       setDefaultsOnInsert: true,
+      session
     },
   );
 

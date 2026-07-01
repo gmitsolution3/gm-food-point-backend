@@ -1,0 +1,22 @@
+import httpStatus from "http-status";
+
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+
+import { ORDER_MESSAGES } from "./order.constant";
+import { OrderService } from "./order.service";
+
+const createOrder = catchAsync(async (req, res) => {
+  const result = await OrderService.createOrder(req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.CREATED,
+    message: ORDER_MESSAGES.CREATED,
+    data: result,
+  });
+});
+
+export const OrderController = {
+  createOrder,
+};

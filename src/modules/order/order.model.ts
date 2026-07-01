@@ -1,6 +1,11 @@
 import { InferSchemaType, model, models, Schema } from "mongoose";
 
-import { EOrderCreatedBy, EOrderStatus, EOrderType } from "./order.enum";
+import {
+  EOrderCreatedBy,
+  EOrderStatus,
+  EOrderType,
+  EPaymentMethod,
+} from "./order.enum";
 
 const orderItemSchema = new Schema(
   {
@@ -88,6 +93,12 @@ export const orderSchema = new Schema(
     orderType: {
       type: String,
       enum: Object.values(EOrderType),
+      required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: Object.values(EPaymentMethod),
       required: true,
     },
 

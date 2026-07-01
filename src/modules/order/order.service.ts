@@ -84,6 +84,8 @@ const createOrder = async (
 
           orderType: payload.orderType,
 
+          paymentMethod: payload.paymentMethod,
+
           status: EOrderStatus.AWAITING_PAYMENT,
 
           items,

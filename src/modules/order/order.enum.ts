@@ -25,3 +25,8 @@ export enum EOrderCreatedBy {
 
   MANAGER = "manager",
 }
+
+export enum EPaymentMethod {
+  CASH = "cash",
+  WECHAT = "wechat",
+}

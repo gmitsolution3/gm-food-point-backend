@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 import { ORDER_MESSAGES } from "./order.constant";
-import { EOrderCreatedBy, EOrderType } from "./order.enum";
+import {
+  EOrderCreatedBy,
+  EOrderType,
+  EPaymentMethod,
+} from "./order.enum";
 
 const createOrderItemSchema = z.object({
   menuId: z
@@ -33,6 +37,8 @@ const createOrderSchema = z.object({
       createdBy: z.nativeEnum(EOrderCreatedBy),
 
       orderType: z.nativeEnum(EOrderType),
+
+      paymentMethod: z.nativeEnum(EPaymentMethod),
 
       notes: z.string().trim().max(500).optional(),
 

@@ -1,4 +1,8 @@
-import { EOrderCreatedBy, EOrderType } from "./order.enum";
+import {
+  EOrderCreatedBy,
+  EOrderType,
+  EPaymentMethod,
+} from "./order.enum";
 
 export type TCreateOrderItemPayload = {
   menuId: string;
@@ -12,6 +16,8 @@ export type TCreateOrderPayload = {
   createdBy: EOrderCreatedBy;
 
   orderType: EOrderType;
+
+  paymentMethod: EPaymentMethod;
 
   notes?: string;
 

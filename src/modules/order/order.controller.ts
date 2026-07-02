@@ -5,6 +5,7 @@ import sendResponse from "../../utils/sendResponse";
 
 import { ORDER_MESSAGES } from "./order.constant";
 import { OrderService } from "./order.service";
+import { GetKitchenOrdersService } from "./services/get-kitchen-orders.service";
 
 const createOrder = catchAsync(async (req, res) => {
   const result = await OrderService.createOrder(req.body);
@@ -17,6 +18,18 @@ const createOrder = catchAsync(async (req, res) => {
   });
 });
 
+const getKitchenOrders = catchAsync(async (_req, res) => {
+  const result = await GetKitchenOrdersService.getKitchenOrders();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: ORDER_MESSAGES.RETRIEVED_ALL,
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
+  getKitchenOrders,
 };

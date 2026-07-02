@@ -13,4 +13,9 @@ router.post(
   OrderController.createOrder,
 );
 
+router.get(
+  "/kitchen",
+  OrderController.getKitchenOrders,
+);
+
 export const OrderRoutes = router;

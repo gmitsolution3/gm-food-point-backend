@@ -3,9 +3,11 @@ import { z } from "zod";
 import { ORDER_MESSAGES } from "./order.constant";
 import {
   EOrderCreatedBy,
+  EOrderStatus,
   EOrderType,
   EPaymentMethod,
 } from "./order.enum";
+import { paginationQuerySchema } from "../../validations/paginationQuery.validation";
 
 const createOrderItemSchema = z.object({
   menuId: z
@@ -83,10 +85,27 @@ const getOrderSchema = z.object({
   }),
 });
 
+const getOrdersSchema = z.object({
+  query: paginationQuerySchema.extend({
+    status: z.nativeEnum(EOrderStatus).optional(),
+
+    orderType: z.nativeEnum(EOrderType).optional(),
+
+    paymentMethod: z
+      .nativeEnum(EPaymentMethod)
+      .optional(),
+
+    businessDate: z.string().optional(),
+
+    tableNumber: z.string().optional(),
+  }),
+});
+
 export const OrderValidation = {
   createOrderSchema,
   startOrderSchema,
   readyOrderSchema,
   completeOrderSchema,
   getOrderSchema,
+  getOrdersSchema
 };

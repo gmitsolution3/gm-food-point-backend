@@ -7,9 +7,9 @@ import { ORDER_MESSAGES } from "./order.constant";
 import { OrderService } from "./order.service";
 import { CompleteOrderService } from "./services/complete-order.service";
 import { GetKitchenOrdersService } from "./services/get-kitchen-orders.service";
+import { GetOrderService } from "./services/get-order.service";
 import { ReadyOrderService } from "./services/ready-order.service";
 import { StartOrderService } from "./services/start-order.service";
-import { GetOrderService } from "./services/get-order.service";
 
 const createOrder = catchAsync(async (req, res) => {
   const result = await OrderService.createOrder(req.body);
@@ -76,13 +76,31 @@ const completeOrder = catchAsync(async (req, res) => {
 });
 
 const getOrder = catchAsync(async (req, res) => {
-  const result = await GetOrderService.getOrder(req.params.orderId as string);
+  const result = await GetOrderService.getOrder(
+    req.params.orderId as string,
+  );
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: ORDER_MESSAGES.RETRIEVED,
     data: result,
+  });
+});
+
+const getOrders = catchAsync(async (req, res) => {
+  const result = await OrderService.getOrders(req.query);
+
+  sendResponse(res, {
+    success: true,
+
+    statusCode: httpStatus.OK,
+
+    message: ORDER_MESSAGES.RETRIEVED_ALL,
+
+    meta: result.meta,
+
+    data: result.data,
   });
 });
 
@@ -93,4 +111,5 @@ export const OrderController = {
   readyOrder,
   completeOrder,
   getOrder,
+  getOrders,
 };

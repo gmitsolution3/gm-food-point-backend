@@ -18,7 +18,8 @@ import { OrderCalculatorService } from "./services/order-calculator.service";
 import { OrderNumberService } from "./services/order-number.service";
 
 import withTransaction from "../../utils/withTransaction";
-import { ORDER_MESSAGES } from "./order.constant";
+import { ORDER_MESSAGES, ORDER_SEARCHABLE_FIELDS } from "./order.constant";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 const createOrder = async (
   payload: TCreateOrderPayload,
@@ -131,6 +132,32 @@ const createOrder = async (
   });
 };
 
+const getOrders = async (query: Record<string, unknown>) => {
+  if (query.tableNumber) {
+    query.tableNumber = Number(query.tableNumber);
+  }
+
+  const queryBuilder = new QueryBuilder(Order.find(), query);
+
+  queryBuilder.search(ORDER_SEARCHABLE_FIELDS);
+
+  queryBuilder.filter();
+
+  queryBuilder.sort();
+
+  queryBuilder.paginate();
+
+  const data = await queryBuilder.modelQuery;
+
+  const meta = await queryBuilder.countTotal();
+
+  return {
+    meta,
+    data,
+  };
+};
+
 export const OrderService = {
   createOrder,
+  getOrders,
 };

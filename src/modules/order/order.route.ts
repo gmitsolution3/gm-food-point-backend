@@ -7,6 +7,12 @@ import { OrderValidation } from "./order.validation";
 
 const router = Router();
 
+router.get(
+  "/",
+  validateRequest(OrderValidation.getOrdersSchema),
+  OrderController.getOrders,
+);
+
 router.post(
   "/",
   validateRequest(OrderValidation.createOrderSchema),

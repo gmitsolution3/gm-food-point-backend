@@ -51,3 +51,5 @@ export const ORDER_MESSAGES = {
 
   ORDER_COMPLETED: "Order completed successfully.",
 } as const;
+
+export const ORDER_SEARCHABLE_FIELDS = ["orderNumber"];

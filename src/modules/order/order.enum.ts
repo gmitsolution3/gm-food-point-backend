@@ -1,3 +1,5 @@
+import { EPaymentMethod } from "../payment/payment.enum";
+
 export enum EOrderType {
   DINE_IN = "dine-in",
 
@@ -26,7 +28,4 @@ export enum EOrderCreatedBy {
   MANAGER = "manager",
 }
 
-export enum EPaymentMethod {
-  CASH = "cash",
-  WECHAT = "wechat",
-}
+export { EPaymentMethod };

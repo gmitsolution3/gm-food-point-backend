@@ -80,6 +80,14 @@ export const settingsSchema = new Schema(
       default: DEFAULT_SETTINGS.orderNumberPrefix,
     },
 
+    paymentTimeoutMinutes: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 120,
+      default: DEFAULT_SETTINGS.paymentTimeoutMinutes,
+    },
+
     isRestaurantOpen: {
       type: Boolean,
       required: true,

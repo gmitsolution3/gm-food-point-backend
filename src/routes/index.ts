@@ -4,6 +4,7 @@ import { CategoryRoutes } from "../modules/category/category.route";
 import { MenuRoutes } from "../modules/menu/menu.route";
 import { OrderRoutes } from "../modules/order/order.route";
 import { SettingsRoutes } from "../modules/settings/settings.route";
+import { PaymentRoutes } from "../modules/payment/payment.route";
 
 const router = Router();
 
@@ -27,6 +28,11 @@ const moduleRoutes: {
     path: "/orders",
     route: OrderRoutes,
   },
+  {
+    path: "/payments",
+
+    route: PaymentRoutes,
+}
 ];
 
 moduleRoutes.forEach((route) => {

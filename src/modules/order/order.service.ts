@@ -2,11 +2,15 @@ import httpStatus from "http-status";
 
 import AppError from "../../errors/AppError";
 
+import { InitializePaymentService } from "../payment/services/initialize-payment.service";
 import { SettingsService } from "../settings/settings.service";
 
 import { EOrderStatus } from "./order.enum";
-import { Order, TOrder } from "./order.model";
-import { TCreateOrderPayload } from "./order.types";
+import { Order } from "./order.model";
+import {
+  TCreateOrderPayload,
+  TCreateOrderResponse,
+} from "./order.types";
 
 import { BuildOrderItemsService } from "./services/build-order-items.service";
 import { KitchenEstimatorService } from "./services/kitchen-estimator.service";
@@ -18,7 +22,7 @@ import { ORDER_MESSAGES } from "./order.constant";
 
 const createOrder = async (
   payload: TCreateOrderPayload,
-): Promise<TOrder> => {
+): Promise<TCreateOrderResponse> => {
   /**
    * Restaurant Settings
    */
@@ -104,7 +108,26 @@ const createOrder = async (
       },
     );
 
-    return order;
+    const payment = await InitializePaymentService.initializePayment({
+      orderId: order._id,
+
+      orderNumber: order.orderNumber,
+
+      businessDate: order.businessDate,
+
+      paymentMethod: order.paymentMethod,
+
+      amount: order.grandTotal,
+
+      paymentTimeoutMinutes: settings.paymentTimeoutMinutes,
+
+      session,
+    });
+
+    return {
+      order,
+      payment,
+    };
   });
 };
 

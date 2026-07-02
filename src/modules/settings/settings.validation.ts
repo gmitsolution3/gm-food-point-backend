@@ -59,6 +59,13 @@ const updateSettingsSchema = z.object({
         .max(10, "Order number prefix cannot exceed 10 characters.")
         .optional(),
 
+      paymentTimeoutMinutes: z
+        .number()
+        .int()
+        .min(1)
+        .max(120)
+        .optional(),
+
       isRestaurantOpen: z.boolean().optional(),
     })
     .strict(),

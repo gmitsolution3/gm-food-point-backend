@@ -29,6 +29,8 @@ export const DEFAULT_SETTINGS = {
 
   orderNumberPrefix: "GM",
 
+  paymentTimeoutMinutes: 10,
+
   isRestaurantOpen: true,
 } as const;
 

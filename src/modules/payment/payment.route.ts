@@ -7,14 +7,12 @@ import { PaymentValidation } from "./payment.validation";
 
 const router = Router();
 
+router.get("/pending", PaymentController.getPendingPayments);
+
 router.post(
   "/cash/:paymentId/confirm",
 
-  validateRequest(
-    PaymentValidation.confirmCashPaymentSchema,
-  ),
+  validateRequest(PaymentValidation.confirmCashPaymentSchema),
 
   PaymentController.confirmCashPayment,
-);
-
-export const PaymentRoutes = router;
+);export const PaymentRoutes = router;

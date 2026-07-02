@@ -13,3 +13,5 @@ export const MENU_MESSAGES = {
   INVALID_DISCOUNT_PRICE:
     "Discount price cannot be greater than the original price.",
 } as const;
+
+export const MENU_SEARCHABLE_FIELDS = ["name"];

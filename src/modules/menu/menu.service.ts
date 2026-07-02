@@ -2,12 +2,14 @@ import httpStatus from "http-status";
 import slugify from "slugify";
 
 import AppError from "../../errors/AppError";
-
 import { Category } from "../category/category.model";
 
-import calculatePagination from "../../utils/calculatePagination";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import validateObjectId from "../../utils/validateObjectId";
-import { MENU_MESSAGES } from "./menu.constant";
+import {
+  MENU_MESSAGES,
+  MENU_SEARCHABLE_FIELDS,
+} from "./menu.constant";
 import { Menu, TMenu } from "./menu.model";
 import { TCreateMenuPayload, TUpdateMenuPayload } from "./menu.types";
 
@@ -102,26 +104,9 @@ const createMenu = async (
   return menu;
 };
 
-const getMenus = async (query: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  categoryId?: string;
-  isAvailable?: boolean | string;
-}) => {
-  const { page, limit, skip } = calculatePagination(query);
-
-  const filter: Record<string, unknown> = {};
-
-  if (query.search) {
-    filter.name = {
-      $regex: query.search,
-      $options: "i",
-    };
-  }
-
+const getMenus = async (query: Record<string, unknown>) => {
   if (query.categoryId) {
-    validateObjectId(query.categoryId, "Category");
+    validateObjectId(query.categoryId as string, "Category");
 
     const category = await Category.findById(query.categoryId);
 
@@ -131,32 +116,31 @@ const getMenus = async (query: {
         MENU_MESSAGES.CATEGORY_NOT_FOUND,
       );
     }
-
-    filter.categoryId = query.categoryId;
   }
 
   if (query.isAvailable !== undefined) {
-    filter.isAvailable =
-      query.isAvailable === true || query.isAvailable === "true";
+    query.isAvailable = query.isAvailable === "true";
   }
 
-  const data = await Menu.find(filter)
-    .populate("categoryId")
-    .populate("suggestedItems")
-    .sort({
-      displayOrder: 1,
-    })
-    .skip(skip)
-    .limit(limit);
+  const queryBuilder = new QueryBuilder(
+    Menu.find().populate("categoryId").populate("suggestedItems"),
+    query,
+  );
 
-  const total = await Menu.countDocuments(filter);
+  queryBuilder.search(MENU_SEARCHABLE_FIELDS);
+
+  queryBuilder.filter();
+
+  queryBuilder.sort("displayOrder");
+
+  queryBuilder.paginate();
+
+  const data = await queryBuilder.modelQuery;
+
+  const meta = await queryBuilder.countTotal();
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
+    meta,
     data,
   };
 };

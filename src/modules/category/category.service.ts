@@ -2,15 +2,15 @@ import httpStatus from "http-status";
 import slugify from "slugify";
 
 import AppError from "../../errors/AppError";
-import calculatePagination from "../../utils/calculatePagination";
 import validateObjectId from "../../utils/validateObjectId";
 
-import { CATEGORY_MESSAGES } from "./category.constant";
+import { CATEGORY_MESSAGES, CATEGORY_SEARCHABLE_FIELDS } from "./category.constant";
 import { Category, TCategory } from "./category.model";
 import {
   TCreateCategoryPayload,
   TUpdateCategoryPayload,
 } from "./category.types";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
 const createCategory = async (
   payload: TCreateCategoryPayload,
@@ -58,25 +58,23 @@ const createCategory = async (
   });
 };
 
-const getCategories = async (query: {
-  page?: number;
-  limit?: number;
-}) => {
-  const { page, limit, skip } = calculatePagination(query);
+const getCategories = async (query: Record<string, unknown>) => {
+  const queryBuilder = new QueryBuilder(Category.find(), query);
 
-  const data = await Category.find()
-    .sort({ displayOrder: 1 })
-    .skip(skip)
-    .limit(limit);
+  queryBuilder.search(CATEGORY_SEARCHABLE_FIELDS);
 
-  const total = await Category.countDocuments();
+  queryBuilder.filter();
+
+  queryBuilder.sort("displayOrder");
+
+  queryBuilder.paginate();
+
+  const data = await queryBuilder.modelQuery;
+
+  const meta = await queryBuilder.countTotal();
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
+    meta,
     data,
   };
 };

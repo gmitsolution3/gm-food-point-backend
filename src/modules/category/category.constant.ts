@@ -10,3 +10,7 @@ export const CATEGORY_MESSAGES = {
   NAME_ALREADY_EXISTS: "Category name already exists.",
   SLUG_ALREADY_EXISTS: "Category slug already exists.",
 } as const;
+
+export const CATEGORY_SEARCHABLE_FIELDS = [
+  "name",
+];

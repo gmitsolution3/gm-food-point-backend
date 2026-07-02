@@ -15,6 +15,14 @@ router.get(
 
 router.get("/pending", PaymentController.getPendingPayments);
 
+router.get(
+  "/:paymentId",
+  validateRequest(
+    PaymentValidation.getPaymentSchema,
+  ),
+  PaymentController.getPayment,
+);
+
 router.post(
   "/cash/:paymentId/confirm",
 

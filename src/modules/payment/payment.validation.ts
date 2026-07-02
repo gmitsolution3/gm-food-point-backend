@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { PAYMENT_MESSAGES } from "./payment.constant";
 import { paginationQuerySchema } from "../../validations/paginationQuery.validation";
+import { PAYMENT_MESSAGES } from "./payment.constant";
 import { EPaymentMethod, EPaymentStatus } from "./payment.enum";
 
 const confirmCashPaymentSchema = z.object({
@@ -23,13 +23,17 @@ const confirmCashPaymentSchema = z.object({
   }),
 });
 
+const getPaymentSchema = z.object({
+  params: z.object({
+    paymentId: z.string(),
+  }),
+});
+
 const getPaymentsSchema = z.object({
   query: paginationQuerySchema.extend({
     status: z.nativeEnum(EPaymentStatus).optional(),
 
-    paymentMethod: z
-      .nativeEnum(EPaymentMethod)
-      .optional(),
+    paymentMethod: z.nativeEnum(EPaymentMethod).optional(),
 
     businessDate: z.string().optional(),
   }),
@@ -37,5 +41,6 @@ const getPaymentsSchema = z.object({
 
 export const PaymentValidation = {
   confirmCashPaymentSchema,
+  getPaymentSchema,
   getPaymentsSchema,
 };

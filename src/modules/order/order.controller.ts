@@ -7,6 +7,7 @@ import { ORDER_MESSAGES } from "./order.constant";
 import { OrderService } from "./order.service";
 import { GetKitchenOrdersService } from "./services/get-kitchen-orders.service";
 import { StartOrderService } from "./services/start-order.service";
+import { ReadyOrderService } from "./services/ready-order.service";
 
 const createOrder = catchAsync(async (req, res) => {
   const result = await OrderService.createOrder(req.body);
@@ -31,10 +32,9 @@ const getKitchenOrders = catchAsync(async (_req, res) => {
 });
 
 const startOrder = catchAsync(async (req, res) => {
-  const result =
-    await StartOrderService.startOrder(
-      req.params.orderId as string,
-    );
+  const result = await StartOrderService.startOrder(
+    req.params.orderId as string,
+  );
 
   sendResponse(res, {
     success: true,
@@ -44,8 +44,22 @@ const startOrder = catchAsync(async (req, res) => {
   });
 });
 
+const readyOrder = catchAsync(async (req, res) => {
+  const result = await ReadyOrderService.readyOrder(
+    req.params.orderId as string,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: ORDER_MESSAGES.ORDER_READY,
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
   getKitchenOrders,
-  startOrder
+  startOrder,
+  readyOrder
 };

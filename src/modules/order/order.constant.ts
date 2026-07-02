@@ -36,4 +36,11 @@ export const ORDER_MESSAGES = {
   ORDER_NOT_READY_TO_START: "Only queued orders can be started.",
 
   ORDER_STARTED: "Order started successfully.",
+
+  ORDER_ALREADY_READY: "Order is already ready.",
+
+  ORDER_NOT_READY_TO_COMPLETE:
+    "Only cooking orders can be marked as ready.",
+
+  ORDER_READY: "Order marked as ready successfully.",
 } as const;

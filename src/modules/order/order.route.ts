@@ -21,4 +21,10 @@ router.patch(
   OrderController.startOrder,
 );
 
+router.patch(
+  "/:orderId/ready",
+  validateRequest(OrderValidation.readyOrderSchema),
+  OrderController.readyOrder,
+);
+
 export const OrderRoutes = router;

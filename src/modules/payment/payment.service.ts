@@ -3,6 +3,8 @@ import { ClientSession } from "mongoose";
 import { EPaymentStatus } from "./payment.enum";
 import { Payment } from "./payment.model";
 import { TCreatePaymentPayload } from "./payment.types";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { PAYMENT_SEARCHABLE_FIELDS } from "./payment.constant";
 
 const createPayment = async ({
   session,
@@ -33,6 +35,36 @@ const createPayment = async ({
   return payment;
 };
 
+const getPayments = async (
+  query: Record<string, unknown>,
+) => {
+  const queryBuilder = new QueryBuilder(
+    Payment.find(),
+    query,
+  );
+
+  queryBuilder.search(
+    PAYMENT_SEARCHABLE_FIELDS,
+  );
+
+  queryBuilder.filter();
+
+  queryBuilder.sort();
+
+  queryBuilder.paginate();
+
+  const data = await queryBuilder.modelQuery;
+
+  const meta =
+    await queryBuilder.countTotal();
+
+  return {
+    meta,
+    data,
+  };
+};
+
 export const PaymentService = {
   createPayment,
+  getPayments,
 };

@@ -7,6 +7,12 @@ import { PaymentValidation } from "./payment.validation";
 
 const router = Router();
 
+router.get(
+  "/",
+  validateRequest(PaymentValidation.getPaymentsSchema),
+  PaymentController.getPayments,
+);
+
 router.get("/pending", PaymentController.getPendingPayments);
 
 router.post(
@@ -15,4 +21,5 @@ router.post(
   validateRequest(PaymentValidation.confirmCashPaymentSchema),
 
   PaymentController.confirmCashPayment,
-);export const PaymentRoutes = router;
+);
+export const PaymentRoutes = router;

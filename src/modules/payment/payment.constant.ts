@@ -26,3 +26,5 @@ export const PAYMENT_MESSAGES = {
 
   AMOUNT_RECEIVED_REQUIRED: "Received amount is required.",
 } as const;
+
+export const PAYMENT_SEARCHABLE_FIELDS = ["orderNumber"];

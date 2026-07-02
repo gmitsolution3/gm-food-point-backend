@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { PAYMENT_MESSAGES } from "./payment.constant";
+import { paginationQuerySchema } from "../../validations/paginationQuery.validation";
+import { EPaymentMethod, EPaymentStatus } from "./payment.enum";
 
 const confirmCashPaymentSchema = z.object({
   params: z.object({
@@ -21,6 +23,19 @@ const confirmCashPaymentSchema = z.object({
   }),
 });
 
+const getPaymentsSchema = z.object({
+  query: paginationQuerySchema.extend({
+    status: z.nativeEnum(EPaymentStatus).optional(),
+
+    paymentMethod: z
+      .nativeEnum(EPaymentMethod)
+      .optional(),
+
+    businessDate: z.string().optional(),
+  }),
+});
+
 export const PaymentValidation = {
   confirmCashPaymentSchema,
+  getPaymentsSchema,
 };

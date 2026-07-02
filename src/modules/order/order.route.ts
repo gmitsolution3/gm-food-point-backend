@@ -13,9 +13,12 @@ router.post(
   OrderController.createOrder,
 );
 
-router.get(
-  "/kitchen",
-  OrderController.getKitchenOrders,
+router.get("/kitchen", OrderController.getKitchenOrders);
+
+router.patch(
+  "/:orderId/start",
+  validateRequest(OrderValidation.startOrderSchema),
+  OrderController.startOrder,
 );
 
 export const OrderRoutes = router;

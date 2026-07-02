@@ -43,4 +43,11 @@ export const ORDER_MESSAGES = {
     "Only cooking orders can be marked as ready.",
 
   ORDER_READY: "Order marked as ready successfully.",
+
+  ORDER_ALREADY_COMPLETED: "Order has already been completed.",
+
+  ORDER_NOT_READY_FOR_COMPLETION:
+    "Only ready orders can be completed.",
+
+  ORDER_COMPLETED: "Order completed successfully.",
 } as const;

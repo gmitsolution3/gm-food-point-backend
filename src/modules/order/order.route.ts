@@ -27,4 +27,18 @@ router.patch(
   OrderController.readyOrder,
 );
 
+router.patch(
+  "/:orderId/complete",
+
+  validateRequest(OrderValidation.completeOrderSchema),
+
+  OrderController.completeOrder,
+);
+
+router.get(
+  "/:orderId",
+  validateRequest(OrderValidation.getOrderSchema),
+  OrderController.getOrder,
+);
+
 export const OrderRoutes = router;

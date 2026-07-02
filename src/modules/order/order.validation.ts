@@ -71,8 +71,22 @@ const readyOrderSchema = z.object({
   }),
 });
 
+const completeOrderSchema = z.object({
+  params: z.object({
+    orderId: z.string(),
+  }),
+});
+
+const getOrderSchema = z.object({
+  params: z.object({
+    orderId: z.string(),
+  }),
+});
+
 export const OrderValidation = {
   createOrderSchema,
   startOrderSchema,
-  readyOrderSchema
+  readyOrderSchema,
+  completeOrderSchema,
+  getOrderSchema,
 };

@@ -118,6 +118,10 @@ const getMenus = async (query: Record<string, unknown>) => {
     }
   }
 
+  if (query.categoryId === "") {
+    delete query.categoryId;
+  }
+
   if (query.isAvailable !== undefined) {
     query.isAvailable = query.isAvailable === "true";
   }

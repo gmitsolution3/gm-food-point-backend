@@ -6,6 +6,8 @@ import withTransaction from "../../../utils/withTransaction";
 import { EOrderStatus } from "../../order/order.enum";
 import { Order } from "../../order/order.model";
 
+import roundMoney from "../../../utils/roundMoney";
+import { ORDER_MESSAGES } from "../../order/order.constant";
 import { PAYMENT_MESSAGES } from "../payment.constant";
 import { EPaymentStatus } from "../payment.enum";
 import { Payment } from "../payment.model";
@@ -13,14 +15,14 @@ import {
   TCashPaymentPayload,
   TConfirmCashPaymentResponse,
 } from "../payment.types";
-import roundMoney from "../../../utils/roundMoney";
-import { ORDER_MESSAGES } from "../../order/order.constant";
+
+import { SocketEmitter } from "../../../socket/socket.emitter";
 
 const confirmCashPayment = async ({
   paymentId,
   amountReceived,
 }: TCashPaymentPayload): Promise<TConfirmCashPaymentResponse> => {
-  return withTransaction(async (session) => {
+  const result = await withTransaction(async (session) => {
     const payment =
       await Payment.findById(paymentId).session(session);
 
@@ -50,7 +52,10 @@ const confirmCashPayment = async ({
     );
 
     if (!order) {
-      throw new AppError(httpStatus.NOT_FOUND, ORDER_MESSAGES.NOT_FOUND);
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        ORDER_MESSAGES.NOT_FOUND,
+      );
     }
 
     payment.amountReceived = amountReceived;
@@ -74,6 +79,15 @@ const confirmCashPayment = async ({
       order,
     };
   });
+
+  SocketEmitter.orderQueued({
+    orderId: result.order._id.toString(),
+    orderNumber: result.order.orderNumber,
+    tableNumber: result.order.tableNumber,
+    estimatedCompletionAt: result.order.estimatedCompletionAt,
+  });
+
+  return result;
 };
 
 export const CashPaymentService = {

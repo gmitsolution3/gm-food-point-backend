@@ -7,6 +7,8 @@ import { ORDER_MESSAGES } from "../order.constant";
 import { EOrderStatus } from "../order.enum";
 import { Order } from "../order.model";
 
+import { SocketEmitter } from "../../../socket/socket.emitter";
+
 const readyOrder = async (orderId: string) => {
   validateObjectId(orderId, "Order");
 
@@ -36,6 +38,12 @@ const readyOrder = async (orderId: string) => {
   order.status = EOrderStatus.READY;
 
   await order.save();
+
+  SocketEmitter.orderReady({
+    orderId: order._id.toString(),
+    orderNumber: order.orderNumber,
+    tableNumber: order.tableNumber,
+  });
 
   return order;
 };

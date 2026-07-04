@@ -17,9 +17,13 @@ import { KitchenEstimatorService } from "./services/kitchen-estimator.service";
 import { OrderCalculatorService } from "./services/order-calculator.service";
 import { OrderNumberService } from "./services/order-number.service";
 
-import withTransaction from "../../utils/withTransaction";
-import { ORDER_MESSAGES, ORDER_SEARCHABLE_FIELDS } from "./order.constant";
 import { QueryBuilder } from "../../utils/QueryBuilder";
+import withTransaction from "../../utils/withTransaction";
+import {
+  ORDER_MESSAGES,
+  ORDER_SEARCHABLE_FIELDS,
+} from "./order.constant";
+import { SocketEmitter } from "../../socket/socket.emitter";
 
 const createOrder = async (
   payload: TCreateOrderPayload,
@@ -66,7 +70,7 @@ const createOrder = async (
   /**
    * Critical Writes
    */
-  return withTransaction(async (session) => {
+  const writeResult = await withTransaction(async (session) => {
     /**
      * Order Number
      */
@@ -130,6 +134,16 @@ const createOrder = async (
       payment,
     };
   });
+
+  SocketEmitter.orderCreated({
+    orderId: writeResult.order._id.toString(),
+    orderNumber: writeResult.order.orderNumber,
+    tableNumber: writeResult.order.tableNumber,
+    paymentMethod: writeResult.payment.paymentMethod,
+    amount: writeResult.payment.amount,
+  });
+
+  return writeResult;
 };
 
 const getOrders = async (query: Record<string, unknown>) => {

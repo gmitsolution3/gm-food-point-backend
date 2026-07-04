@@ -12,7 +12,7 @@ export type TOrderQueuedPayload = {
   orderId: string;
   orderNumber: number;
   tableNumber: number;
-  estimatedCompletionTime: number;
+  estimatedCompletionAt: Date;
 };
 
 export type TOrderCookingPayload = {

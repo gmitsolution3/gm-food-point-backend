@@ -2,6 +2,7 @@ import http from "http";
 import app from "./app";
 import config from "./config";
 import connectDB from "./config/database";
+import { initializeSocket } from "./socket";
 
 const server = http.createServer(app);
 
@@ -13,6 +14,8 @@ async function startServer() {
     server.listen(config.port, () => {
       console.log(`app is listening to port ${config.port}`);
     });
+
+    initializeSocket(server);
 
     //? handle unexpected error
     process.on("unhandlededRejection", (error) => {

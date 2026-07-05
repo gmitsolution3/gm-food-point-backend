@@ -28,4 +28,11 @@ export enum EOrderCreatedBy {
   MANAGER = "manager",
 }
 
+export const KITCHEN_ORDER_STATUSES = [
+  EOrderStatus.QUEUED,
+  EOrderStatus.COOKING,
+  EOrderStatus.READY,
+  EOrderStatus.COMPLETED,
+] as const;
+
 export { EPaymentMethod };

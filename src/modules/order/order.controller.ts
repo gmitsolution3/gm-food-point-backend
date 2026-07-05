@@ -22,8 +22,11 @@ const createOrder = catchAsync(async (req, res) => {
   });
 });
 
-const getKitchenOrders = catchAsync(async (_req, res) => {
-  const result = await GetKitchenOrdersService.getKitchenOrders();
+const getKitchenOrders = catchAsync(async (req, res) => {
+  const result =
+  await GetKitchenOrdersService.getKitchenOrders(
+    req.query,
+  );
 
   sendResponse(res, {
     success: true,

@@ -1,12 +1,25 @@
 import { EOrderStatus } from "../order.enum";
 import { Order, TOrderItem } from "../order.model";
 
-const getKitchenOrders = async () => {
+import httpStatus from "http-status";
+import AppError from "../../../errors/AppError";
+
+import { KITCHEN_ORDER_STATUSES } from "../order.enum";
+
+const getKitchenOrders = async (query: Record<string, unknown>) => {
+  const status =
+    (query.status as EOrderStatus) ?? EOrderStatus.QUEUED;
+
+  if (!KITCHEN_ORDER_STATUSES.includes(status as any)) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Invalid kitchen order status.",
+    );
+  }
+
   const orders = await Order.find(
     {
-      status: {
-        $in: [EOrderStatus.QUEUED, EOrderStatus.COOKING],
-      },
+      status,
     },
     {
       orderNumber: 1,
@@ -19,7 +32,7 @@ const getKitchenOrders = async () => {
     },
   )
     .sort({
-      createdAt: 1,
+      estimatedCompletionAt: 1,
     })
     .lean();
 

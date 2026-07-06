@@ -93,6 +93,11 @@ export const SocketEmitter = {
       payload,
     );
 
+    io.to(SOCKET_ROOMS.KITCHEN).emit(
+      SOCKET_EVENTS.ORDER_COMPLETED,
+      payload,
+    );
+
     io.to(getTableRoom(payload.tableNumber)).emit(
       SOCKET_EVENTS.NOTIFICATION,
       `Your order no: ${payload.orderNumber} has been completed. Thank you for dining with us! We hope you enjoyed your meal.`,

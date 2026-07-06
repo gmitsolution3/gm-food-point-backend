@@ -31,15 +31,28 @@ export const SocketEmitter = {
   },
 
   orderCooking(payload: TOrderCookingPayload) {
-    getIO()
-      .to(getTableRoom(payload.tableNumber))
-      .emit(SOCKET_EVENTS.ORDER_COOKING, payload);
+    const io = getIO();
+
+    io.to(SOCKET_ROOMS.KITCHEN).emit(
+      SOCKET_EVENTS.ORDER_COOKING,
+      payload,
+    );
+
+    io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.ORDER_COOKING,
+      payload,
+    );
   },
 
   orderReady(payload: TOrderReadyPayload) {
     const io = getIO();
 
     io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.ORDER_READY,
+      payload,
+    );
+
+    io.to(SOCKET_ROOMS.KITCHEN).emit(
       SOCKET_EVENTS.ORDER_READY,
       payload,
     );

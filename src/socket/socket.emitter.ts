@@ -36,6 +36,11 @@ export const SocketEmitter = {
       SOCKET_EVENTS.ORDER_QUEUED,
       payload,
     );
+
+    io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.NOTIFICATION,
+      `Your order no: ${payload.orderNumber} has been queued. Estimated completion time is ${payload.estimatedCompletionAt.toLocaleTimeString()}. Please wait for your order to be ready.`,
+    );
   },
 
   orderCooking(payload: TOrderCookingPayload) {
@@ -50,14 +55,19 @@ export const SocketEmitter = {
       SOCKET_EVENTS.ORDER_COOKING,
       payload,
     );
+
+    io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.NOTIFICATION,
+      `Your order no: ${payload.orderNumber} is now being cooked. Please wait for your order to be ready.`,
+    );
   },
 
   orderReady(payload: TOrderReadyPayload) {
     const io = getIO();
 
     io.to(getTableRoom(payload.tableNumber)).emit(
-      SOCKET_EVENTS.ORDER_READY,
-      payload,
+      SOCKET_EVENTS.NOTIFICATION,
+      `Your order no: ${payload.orderNumber} is now ready to serve! Please collect your food from the counter. Enjoy your meal!`,
     );
 
     io.to(SOCKET_ROOMS.KITCHEN).emit(
@@ -77,14 +87,22 @@ export const SocketEmitter = {
   },
 
   orderCompleted(payload: TOrderCompletedPayload) {
-    getIO()
-      .to(getTableRoom(payload.tableNumber))
-      .emit(SOCKET_EVENTS.ORDER_COMPLETED, payload);
+    const io = getIO();
+    io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.ORDER_COMPLETED,
+      payload,
+    );
+
+    io.to(getTableRoom(payload.tableNumber)).emit(
+      SOCKET_EVENTS.NOTIFICATION,
+      `Your order no: ${payload.orderNumber} has been completed. Thank you for dining with us! We hope you enjoyed your meal.`,
+    );
   },
 
   castNotification(message: string) {
-    getIO()
-      .to(SOCKET_ROOMS.GLOBAL)
-      .emit(SOCKET_EVENTS.NOTIFICATION, { message });
+    const io = getIO();
+    io.to(SOCKET_ROOMS.GLOBAL).emit(SOCKET_EVENTS.NOTIFICATION, {
+      message,
+    });
   },
 };

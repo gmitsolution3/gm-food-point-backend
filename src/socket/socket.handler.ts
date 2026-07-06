@@ -11,7 +11,6 @@ export const registerSocketHandler = (io: Server) => {
     socket.on(
       SOCKET_EVENTS.JOIN_ROOM,
       (payload: TJoinRoomPayload) => {
-        console.log(payload);
         if (payload.role) {
           socket.join(ROLE_ROOM_MAP[payload.role]);
         }

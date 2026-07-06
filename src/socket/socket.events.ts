@@ -8,4 +8,6 @@ export const SOCKET_EVENTS = {
   ORDER_COOKING: "order:cooking",
   ORDER_READY: "order:ready",
   ORDER_COMPLETED: "order:completed",
+
+  NOTIFICATION: "notification",
 } as const;

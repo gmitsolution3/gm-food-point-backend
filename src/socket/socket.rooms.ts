@@ -4,6 +4,7 @@ export const SOCKET_ROOMS = {
   CASHIER: "cashier",
   KITCHEN: "kitchen",
   MANAGER: "manager",
+  GLOBAL: "global",
 } as const;
 
 export const ROLE_ROOM_MAP: Record<

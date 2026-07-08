@@ -3,8 +3,9 @@ import { Router } from "express";
 import { CategoryRoutes } from "../modules/category/category.route";
 import { MenuRoutes } from "../modules/menu/menu.route";
 import { OrderRoutes } from "../modules/order/order.route";
-import { SettingsRoutes } from "../modules/settings/settings.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
+import { SettingsRoutes } from "../modules/settings/settings.route";
+import { UserRoutes } from "../modules/user/user.route";
 
 const router = Router();
 
@@ -30,9 +31,12 @@ const moduleRoutes: {
   },
   {
     path: "/payments",
-
     route: PaymentRoutes,
-}
+  },
+  {
+    path: "/users",
+    route: UserRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => {

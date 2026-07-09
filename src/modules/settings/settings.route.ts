@@ -10,7 +10,7 @@ const router = Router();
 router.get("/", SettingsController.getSettings);
 
 router.patch(
-  "/",
+  "/update",
   validateRequest(SettingsValidation.updateSettingsSchema),
   SettingsController.updateSettings,
 );

@@ -52,6 +52,13 @@ const updateSettingsSchema = z.object({
 
       isServiceChargeEnabled: z.boolean().optional(),
 
+      currency: z
+        .string()
+        .trim()
+        .min(1, "Currency is required.")
+        .max(10, "Currency code cannot exceed 3 characters.")
+        .optional(),
+
       orderNumberPrefix: z
         .string()
         .trim()

@@ -6,6 +6,7 @@ import { OrderRoutes } from "../modules/order/order.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { SettingsRoutes } from "../modules/settings/settings.route";
 import { UserRoutes } from "../modules/user/user.route";
+import { DashboardRoutes } from "../modules/dashboard/dashboard.route";
 
 const router = Router();
 
@@ -36,6 +37,10 @@ const moduleRoutes: {
   {
     path: "/users",
     route: UserRoutes,
+  },
+  {
+    path: "/dashboard",
+    route: DashboardRoutes,
   },
 ];
 

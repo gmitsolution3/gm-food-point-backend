@@ -20,6 +20,24 @@ const getFinance = catchAsync(async (req, res) => {
   });
 });
 
+const getStatistics = catchAsync(async (_req, res) => {
+  const result =
+    await DashboardService.getStatistics();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+
+    success: true,
+
+    message:
+      DASHBOARD_MESSAGES.STATISTICS_RETRIEVED,
+
+    data: result,
+  });
+});
+
 export const DashboardController = {
   getFinance,
+
+  getStatistics,
 };

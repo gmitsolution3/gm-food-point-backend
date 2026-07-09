@@ -15,4 +15,9 @@ router.get(
   DashboardController.getFinance,
 );
 
+router.get(
+  "/statistics",
+  DashboardController.getStatistics,
+);
+
 export const DashboardRoutes = router;

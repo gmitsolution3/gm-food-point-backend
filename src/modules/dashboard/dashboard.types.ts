@@ -44,4 +44,18 @@ export type TStatisticsResponse = {
 
     categories: number;
   };
+
+  charts: {
+    weeklyRevenue: {
+      date: string;
+
+      revenue: number;
+    }[];
+
+    weeklyOrders: {
+      date: string;
+
+      orders: number;
+    }[];
+  };
 };

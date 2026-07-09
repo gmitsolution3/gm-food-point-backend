@@ -20,6 +20,10 @@ import { User } from "../user/user.model";
 
 import { TStatisticsResponse } from "./dashboard.types";
 
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const mongoWeekDays = [2, 3, 4, 5, 6, 7, 1];
+
 const RANGE_MAP: Record<
   EFinanceRange,
   {
@@ -146,7 +150,9 @@ const getFinance = async ({
 };
 
 const getStatistics = async (): Promise<TStatisticsResponse> => {
-  const today = dayjs().startOf("day").toDate();
+  const today = dayjs().startOf("day");
+
+  const startOfWeek = today.startOf("week").add(1, "day");
 
   const [
     totalToday,
@@ -159,6 +165,8 @@ const getStatistics = async (): Promise<TStatisticsResponse> => {
     totalUsers,
     totalMenus,
     totalCategories,
+    weeklyRevenue,
+    weeklyOrders,
   ] = await Promise.all([
     Order.countDocuments({
       businessDate: dayjs().format("YYYY-MM-DD"),
@@ -197,7 +205,77 @@ const getStatistics = async (): Promise<TStatisticsResponse> => {
     Menu.countDocuments(),
 
     Category.countDocuments(),
+
+    Payment.aggregate([
+      {
+        $match: {
+          status: EPaymentStatus.PAID,
+
+          confirmedAt: {
+            $gte: startOfWeek.toDate(),
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            $dayOfWeek: "$confirmedAt",
+          },
+
+          revenue: {
+            $sum: "$amount",
+          },
+        },
+      },
+    ]),
+
+    Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfWeek.toDate(),
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            $dayOfWeek: "$createdAt",
+          },
+
+          orders: {
+            $sum: 1,
+          },
+        },
+      },
+    ]),
   ]);
+
+  const revenueMap = new Map<number, number>();
+
+  weeklyRevenue.forEach((item) => {
+    revenueMap.set(item._id, item.revenue);
+  });
+
+  const orderMap = new Map<number, number>();
+
+  weeklyOrders.forEach((item) => {
+    orderMap.set(item._id, item.orders);
+  });
+
+  const weeklyRevenueChart = WEEK_DAYS.map((day, index) => ({
+    date: day,
+
+    revenue: revenueMap.get(mongoWeekDays[index]) ?? 0,
+  }));
+
+  const weeklyOrderChart = WEEK_DAYS.map((day, index) => ({
+    date: day,
+
+    orders: orderMap.get(mongoWeekDays[index]) ?? 0,
+  }));
 
   return {
     orders: {
@@ -224,6 +302,12 @@ const getStatistics = async (): Promise<TStatisticsResponse> => {
       menus: totalMenus,
 
       categories: totalCategories,
+    },
+
+    charts: {
+      weeklyRevenue: weeklyRevenueChart,
+
+      weeklyOrders: weeklyOrderChart,
     },
   };
 };

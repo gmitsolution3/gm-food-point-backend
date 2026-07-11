@@ -67,14 +67,12 @@ export const orderSchema = new Schema(
     orderNumber: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
 
     businessDate: {
       type: String,
       required: true,
-      index: true,
     },
 
     tableNumber: {
@@ -176,6 +174,16 @@ export const orderSchema = new Schema(
   {
     timestamps: true,
     versionKey: false,
+  },
+);
+
+orderSchema.index(
+  {
+    businessDate: 1,
+    orderNumber: 1,
+  },
+  {
+    unique: true,
   },
 );
 

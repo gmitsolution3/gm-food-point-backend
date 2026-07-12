@@ -21,20 +21,18 @@ import { FinanceChartService } from "./services/finance-chart.service";
 import { FinanceSummaryService } from "./services/finance-summary.service";
 
 const getFinance = async ({
-  range = EFinanceRange.TODAY,
+  range,
 }: TGetFinanceQuery): Promise<TFinanceResponse> => {
   const [summary, charts] = await Promise.all([
     FinanceSummaryService.getFinanceSummary(range),
-
     FinanceChartService.getFinanceCharts(range),
   ]);
 
   return {
     summary,
-
     charts,
   };
-};;
+};
 
 const getStatistics = async (): Promise<TStatisticsResponse> => {
   const today = dayjs().startOf("day");

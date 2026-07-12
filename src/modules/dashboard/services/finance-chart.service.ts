@@ -1,107 +1,484 @@
-import dayjs from "dayjs";
-
-import { Order } from "../../order/order.model";
-import { EPaymentStatus } from "../../payment/payment.enum";
-import { Payment } from "../../payment/payment.model";
+import { QueryFilter, Model } from "mongoose";
 
 import { EFinanceRange } from "../dashboard.enum";
-import { TChartPoint } from "../dashboard.types";
 
-import { BuildDailySeriesService } from "./chart/build-daily-series.service";
+import { Order } from "../../order/order.model";
 
-const getFinanceCharts = async (
-  range: EFinanceRange,
-): Promise<{
-  revenue: TChartPoint[];
-  orders: TChartPoint[];
-}> => {
-  /**
-   * We will implement
-   *
-   * TODAY
-   * 7 DAYS
-   * 15 DAYS
-   * 1 MONTH
-   *
-   * using Daily Series first.
-   *
-   * Later we'll add
-   *
-   * 3 MONTHS
-   * 6 MONTHS
-   * 1 YEAR
-   */
+import { EPaymentStatus } from "../../payment/payment.enum";
+
+import { Payment } from "../../payment/payment.model";
+
+import { TChartPoint, TFinanceCharts } from "../dashboard.types";
+
+import dayjs from "dayjs";
+
+type TAggregateSeriesOptions = {
+  model: Model<unknown>;
+
+  match: QueryFilter<unknown>;
+
+  bucketExpression: Record<string, unknown>;
+
+  valueExpression: Record<string, unknown>;
+};
+
+const aggregateSeries = async ({
+  model,
+  match,
+  bucketExpression,
+  valueExpression,
+}: TAggregateSeriesOptions): Promise<
+  Map<string | number, number>
+> => {
+  const aggregation = await model.aggregate([
+    {
+      $match: match,
+    },
+
+    {
+      $group: {
+        _id: bucketExpression,
+
+        value: valueExpression as any,
+      },
+    },
+
+    {
+      $sort: {
+        _id: 1,
+      },
+    },
+  ]);
+
+  const series = new Map<string | number, number>();
+
+  aggregation.forEach((item) => {
+    series.set(item._id, item.value);
+  });
+
+  return series;
+};
+
+const buildChartPoints = ({
+  start,
+  end,
+  unit,
+  labelFormat,
+  series,
+}: {
+  start: dayjs.Dayjs;
+  end: dayjs.Dayjs;
+  unit: dayjs.ManipulateType;
+  labelFormat: string;
+  series: Map<string | number, number>;
+}): TChartPoint[] => {
+  const points: TChartPoint[] = [];
+
+  let current = start;
+
+  while (current.isBefore(end, unit) || current.isSame(end, unit)) {
+    let key: string | number;
+
+    switch (unit) {
+      case "hour":
+        key = current.hour();
+        break;
+
+      case "month":
+        key = current.format("YYYY-MM");
+        break;
+
+      default:
+        key = current.format("YYYY-MM-DD");
+    }
+
+    points.push({
+      label: current.format(labelFormat),
+      value: series.get(key) ?? 0,
+    });
+
+    current = current.add(1, unit);
+  }
+
+  return points;
+};
+
+const buildHourlyCharts = async (): Promise<TFinanceCharts> => {
+  const startDate = dayjs().startOf("day");
 
   const endDate = dayjs().endOf("day");
 
-  let startDate = endDate;
-
-  switch (range) {
-    case EFinanceRange.TODAY:
-      startDate = dayjs().startOf("day");
-      break;
-
-    case EFinanceRange.SEVEN_DAYS:
-      startDate = dayjs().subtract(6, "day").startOf("day");
-      break;
-
-    case EFinanceRange.FIFTEEN_DAYS:
-      startDate = dayjs().subtract(14, "day").startOf("day");
-      break;
-
-    case EFinanceRange.ONE_MONTH:
-      startDate = dayjs().subtract(29, "day").startOf("day");
-      break;
-
-    /**
-     * Temporary
-     */
-    case EFinanceRange.THREE_MONTHS:
-    case EFinanceRange.SIX_MONTHS:
-    case EFinanceRange.ONE_YEAR:
-      startDate = dayjs().subtract(29, "day").startOf("day");
-      break;
-  }
-
-  const [revenue, orders] = await Promise.all([
-    BuildDailySeriesService.buildDailySeries({
+  const [revenueSeries, orderSeries] = await Promise.all([
+    aggregateSeries({
       model: Payment,
-
-      dateField: "confirmedAt",
-
-      startDate: startDate.toDate(),
-
-      endDate: endDate.toDate(),
 
       match: {
         status: EPaymentStatus.PAID,
+
+        confirmedAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
       },
 
-      operation: {
+      bucketExpression: {
+        $hour: "$confirmedAt",
+      },
+
+      valueExpression: {
         $sum: "$amount",
       },
     }),
 
-    BuildDailySeriesService.buildDailySeries({
+    aggregateSeries({
       model: Order,
 
-      dateField: "createdAt",
+      match: {
+        createdAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
 
-      startDate: startDate.toDate(),
+      bucketExpression: {
+        $hour: "$createdAt",
+      },
 
-      endDate: endDate.toDate(),
+      valueExpression: {
+        $sum: 1,
+      },
+    }),
+  ]);
 
-      operation: {
+  const revenue: TChartPoint[] = [];
+
+  const orders: TChartPoint[] = [];
+
+  for (let hour = 0; hour < 24; hour++) {
+    revenue.push({
+      label: hour.toString().padStart(2, "0"),
+
+      value: revenueSeries.get(hour) ?? 0,
+    });
+
+    orders.push({
+      label: hour.toString().padStart(2, "0"),
+
+      value: orderSeries.get(hour) ?? 0,
+    });
+  }
+
+  return {
+    granularity: "hourly",
+
+    revenue,
+
+    orders,
+  };
+};
+
+const buildDailyCharts = async (
+  days: number,
+): Promise<TFinanceCharts> => {
+  const endDate = dayjs().endOf("day");
+
+  const startDate = dayjs()
+    .subtract(days - 1, "day")
+    .startOf("day");
+
+  const [revenueSeries, orderSeries] = await Promise.all([
+    aggregateSeries({
+      model: Payment,
+
+      match: {
+        status: EPaymentStatus.PAID,
+
+        confirmedAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%m-%d",
+
+          date: "$confirmedAt",
+        },
+      },
+
+      valueExpression: {
+        $sum: "$amount",
+      },
+    }),
+
+    aggregateSeries({
+      model: Order,
+
+      match: {
+        createdAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%m-%d",
+
+          date: "$createdAt",
+        },
+      },
+
+      valueExpression: {
         $sum: 1,
       },
     }),
   ]);
 
   return {
+    granularity: "daily",
+
+    revenue: buildChartPoints({
+      start: startDate,
+
+      end: endDate,
+
+      unit: "day",
+
+      labelFormat: "D MMM",
+
+      series: revenueSeries,
+    }),
+
+    orders: buildChartPoints({
+      start: startDate,
+
+      end: endDate,
+
+      unit: "day",
+
+      labelFormat: "D MMM",
+
+      series: orderSeries,
+    }),
+  };
+};
+
+const buildWeeklyCharts = async (): Promise<TFinanceCharts> => {
+  const endDate = dayjs().endOf("week");
+
+  const startDate = endDate.subtract(11, "week").startOf("week");
+
+  const [revenueSeries, orderSeries] = await Promise.all([
+    aggregateSeries({
+      model: Payment,
+
+      match: {
+        status: EPaymentStatus.PAID,
+
+        confirmedAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%U",
+          date: "$confirmedAt",
+        },
+      },
+
+      valueExpression: {
+        $sum: "$amount",
+      },
+    }),
+
+    aggregateSeries({
+      model: Order,
+
+      match: {
+        createdAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%U",
+          date: "$createdAt",
+        },
+      },
+
+      valueExpression: {
+        $sum: 1,
+      },
+    }),
+  ]);
+
+  const revenue: TChartPoint[] = [];
+
+  const orders: TChartPoint[] = [];
+
+  let current = startDate;
+
+  let week = 1;
+
+  while (
+    current.isBefore(endDate, "week") ||
+    current.isSame(endDate, "week")
+  ) {
+    const key = current.format("YYYY-ww");
+
+    revenue.push({
+      label: `Week ${week}`,
+
+      value: revenueSeries.get(key) ?? 0,
+    });
+
+    orders.push({
+      label: `Week ${week}`,
+
+      value: orderSeries.get(key) ?? 0,
+    });
+
+    current = current.add(1, "week");
+
+    week++;
+  }
+
+  return {
+    granularity: "weekly",
+
     revenue,
 
     orders,
   };
+};
+
+const buildMonthlyCharts = async (
+  months: number,
+): Promise<TFinanceCharts> => {
+  const endDate = dayjs().endOf("month");
+
+  const startDate = endDate
+    .subtract(months - 1, "month")
+    .startOf("month");
+
+  const [revenueSeries, orderSeries] = await Promise.all([
+    aggregateSeries({
+      model: Payment,
+
+      match: {
+        status: EPaymentStatus.PAID,
+
+        confirmedAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%m",
+          date: "$confirmedAt",
+        },
+      },
+
+      valueExpression: {
+        $sum: "$amount",
+      },
+    }),
+
+    aggregateSeries({
+      model: Order,
+
+      match: {
+        createdAt: {
+          $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
+        },
+      },
+
+      bucketExpression: {
+        $dateToString: {
+          format: "%Y-%m",
+          date: "$createdAt",
+        },
+      },
+
+      valueExpression: {
+        $sum: 1,
+      },
+    }),
+  ]);
+
+  const revenue: TChartPoint[] = [];
+
+  const orders: TChartPoint[] = [];
+
+  let current = startDate;
+
+  while (
+    current.isBefore(endDate, "month") ||
+    current.isSame(endDate, "month")
+  ) {
+    const key = current.format("YYYY-MM");
+
+    revenue.push({
+      label: current.format("MMM"),
+
+      value: revenueSeries.get(key) ?? 0,
+    });
+
+    orders.push({
+      label: current.format("MMM"),
+
+      value: orderSeries.get(key) ?? 0,
+    });
+
+    current = current.add(1, "month");
+  }
+
+  return {
+    granularity: "monthly",
+
+    revenue,
+
+    orders,
+  };
+};
+
+const getFinanceCharts = async (
+  range: EFinanceRange,
+): Promise<TFinanceCharts> => {
+  switch (range) {
+    case EFinanceRange.TODAY:
+      return buildHourlyCharts();
+
+    case EFinanceRange.SEVEN_DAYS:
+      return buildDailyCharts(7);
+
+    case EFinanceRange.FIFTEEN_DAYS:
+      return buildDailyCharts(15);
+
+    case EFinanceRange.ONE_MONTH:
+      return buildDailyCharts(30);
+
+    case EFinanceRange.THREE_MONTHS:
+      return buildWeeklyCharts();
+
+    case EFinanceRange.SIX_MONTHS:
+      return buildMonthlyCharts(6);
+
+    case EFinanceRange.ONE_YEAR:
+      return buildMonthlyCharts(12);
+
+    default:
+      throw new Error("Invalid finance range.");
+  }
 };
 
 export const FinanceChartService = {

@@ -4,6 +4,12 @@ export type TGetFinanceQuery = {
   range: EFinanceRange;
 };
 
+export type TChartGranularity =
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "monthly";
+
 export type TChartPoint = {
   label: string;
 
@@ -22,14 +28,18 @@ export type TFinanceSummary = {
   wechatRevenue: number;
 };
 
+export type TFinanceCharts = {
+  granularity: TChartGranularity;
+
+  revenue: TChartPoint[];
+
+  orders: TChartPoint[];
+};
+
 export type TFinanceResponse = {
   summary: TFinanceSummary;
 
-  charts: {
-    revenue: TChartPoint[];
-
-    orders: TChartPoint[];
-  };
+  charts: TFinanceCharts;
 };
 
 export type TStatisticsResponse = {

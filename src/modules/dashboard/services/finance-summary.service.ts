@@ -9,31 +9,25 @@ import { Payment } from "../../payment/payment.model";
 import { EFinanceRange } from "../dashboard.enum";
 import { TFinanceSummary } from "../dashboard.types";
 
-const RANGE_MAP: Record<
-  EFinanceRange,
-  {
-    amount: number;
-    unit: dayjs.ManipulateType;
-  }
-> = {
+const RANGE_CONFIG = {
   [EFinanceRange.TODAY]: {
     amount: 0,
     unit: "day",
   },
 
   [EFinanceRange.SEVEN_DAYS]: {
-    amount: 7,
+    amount: 6,
     unit: "day",
   },
 
   [EFinanceRange.FIFTEEN_DAYS]: {
-    amount: 15,
+    amount: 14,
     unit: "day",
   },
 
   [EFinanceRange.ONE_MONTH]: {
-    amount: 1,
-    unit: "month",
+    amount: 29,
+    unit: "day",
   },
 
   [EFinanceRange.THREE_MONTHS]: {
@@ -50,12 +44,14 @@ const RANGE_MAP: Record<
     amount: 1,
     unit: "year",
   },
-};
+} as const;
 
 const getFinanceSummary = async (
   range: EFinanceRange,
 ): Promise<TFinanceSummary> => {
-  const config = RANGE_MAP[range];
+  const config = RANGE_CONFIG[range];
+
+  const endDate = dayjs().endOf("day");
 
   const startDate =
     range === EFinanceRange.TODAY
@@ -64,13 +60,14 @@ const getFinanceSummary = async (
           .subtract(config.amount, config.unit)
           .startOf("day");
 
-  const [finance] = await Payment.aggregate([
+  const [summary] = await Payment.aggregate([
     {
       $match: {
         status: EPaymentStatus.PAID,
 
         confirmedAt: {
           $gte: startDate.toDate(),
+          $lte: endDate.toDate(),
         },
       },
     },
@@ -120,11 +117,9 @@ const getFinanceSummary = async (
     },
   ]);
 
-  const totalRevenue =
-    finance?.totalRevenue ?? 0;
+  const totalRevenue = summary?.totalRevenue ?? 0;
 
-  const totalOrders =
-    finance?.totalOrders ?? 0;
+  const totalOrders = summary?.totalOrders ?? 0;
 
   return {
     totalRevenue,
@@ -132,19 +127,16 @@ const getFinanceSummary = async (
     totalOrders,
 
     averageOrderValue:
-      totalOrders > 0
-        ? Number(
-            (
-              totalRevenue / totalOrders
-            ).toFixed(2),
-          )
-        : 0,
+      totalOrders === 0
+        ? 0
+        : Number(
+            (totalRevenue / totalOrders).toFixed(2),
+          ),
 
-    cashRevenue:
-      finance?.cashRevenue ?? 0,
+    cashRevenue: summary?.cashRevenue ?? 0,
 
     wechatRevenue:
-      finance?.wechatRevenue ?? 0,
+      summary?.wechatRevenue ?? 0,
   };
 };
 

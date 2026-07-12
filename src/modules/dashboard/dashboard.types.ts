@@ -1,12 +1,16 @@
 import { EFinanceRange } from "./dashboard.enum";
 
 export type TGetFinanceQuery = {
-  range?: EFinanceRange;
+  range: EFinanceRange;
 };
 
-export type TFinanceResponse = {
-  range: EFinanceRange;
+export type TChartPoint = {
+  label: string;
 
+  value: number;
+};
+
+export type TFinanceSummary = {
   totalRevenue: number;
 
   totalOrders: number;
@@ -16,6 +20,16 @@ export type TFinanceResponse = {
   cashRevenue: number;
 
   wechatRevenue: number;
+};
+
+export type TFinanceResponse = {
+  summary: TFinanceSummary;
+
+  charts: {
+    revenue: TChartPoint[];
+
+    orders: TChartPoint[];
+  };
 };
 
 export type TStatisticsResponse = {
@@ -43,19 +57,5 @@ export type TStatisticsResponse = {
     menus: number;
 
     categories: number;
-  };
-
-  charts: {
-    weeklyRevenue: {
-      date: string;
-
-      revenue: number;
-    }[];
-
-    weeklyOrders: {
-      date: string;
-
-      orders: number;
-    }[];
   };
 };

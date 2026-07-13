@@ -10,7 +10,6 @@ import {
 import { Payment } from "../payment/payment.model";
 import { User } from "../user/user.model";
 
-import { EFinanceRange } from "./dashboard.enum";
 import {
   TFinanceResponse,
   TGetFinanceQuery,

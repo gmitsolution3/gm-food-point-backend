@@ -1,4 +1,4 @@
-import { QueryFilter, Model } from "mongoose";
+import { Model, QueryFilter } from "mongoose";
 
 import { EFinanceRange } from "../dashboard.enum";
 
@@ -202,8 +202,12 @@ const buildDailyCharts = async (
       bucketExpression: {
         $dateToString: {
           format: "%Y-%m-%d",
-
-          date: "$confirmedAt",
+          date: {
+            $dateTrunc: {
+              date: "$confirmedAt",
+              unit: "week",
+            },
+          },
         },
       },
 
@@ -225,8 +229,12 @@ const buildDailyCharts = async (
       bucketExpression: {
         $dateToString: {
           format: "%Y-%m-%d",
-
-          date: "$createdAt",
+          date: {
+            $dateTrunc: {
+              date: "$createdAt",
+              unit: "week",
+            },
+          },
         },
       },
 
@@ -285,8 +293,13 @@ const buildWeeklyCharts = async (): Promise<TFinanceCharts> => {
 
       bucketExpression: {
         $dateToString: {
-          format: "%Y-%U",
-          date: "$confirmedAt",
+          format: "%Y-%m-%d",
+          date: {
+            $dateTrunc: {
+              date: "$confirmedAt",
+              unit: "week",
+            },
+          },
         },
       },
 
@@ -307,8 +320,13 @@ const buildWeeklyCharts = async (): Promise<TFinanceCharts> => {
 
       bucketExpression: {
         $dateToString: {
-          format: "%Y-%U",
-          date: "$createdAt",
+          format: "%Y-%m-%d",
+          date: {
+            $dateTrunc: {
+              date: "$createdAt",
+              unit: "week",
+            },
+          },
         },
       },
 
@@ -330,16 +348,16 @@ const buildWeeklyCharts = async (): Promise<TFinanceCharts> => {
     current.isBefore(endDate, "week") ||
     current.isSame(endDate, "week")
   ) {
-    const key = current.format("YYYY-ww");
+    const key = current.startOf("week").format("YYYY-MM-DD");
 
     revenue.push({
-      label: `Week ${week}`,
+      label: `${current.startOf("week").format("D MMM")}`,
 
       value: revenueSeries.get(key) ?? 0,
     });
 
     orders.push({
-      label: `Week ${week}`,
+      label: `${current.startOf("week").format("D MMM")}`,
 
       value: orderSeries.get(key) ?? 0,
     });

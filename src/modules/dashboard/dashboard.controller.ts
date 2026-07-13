@@ -6,8 +6,12 @@ import sendResponse from "../../utils/sendResponse";
 import { DASHBOARD_MESSAGES } from "./dashboard.constant";
 import { DashboardService } from "./dashboard.service";
 
+import {
+  TGetFinanceQuery,
+} from "./dashboard.types";
+
 const getFinance = catchAsync(async (req, res) => {
-  const result = await DashboardService.getFinance(req.query);
+  const result = await DashboardService.getFinance(req.query as TGetFinanceQuery);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

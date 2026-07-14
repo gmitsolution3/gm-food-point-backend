@@ -9,6 +9,8 @@ import {
 import { Settings, TSettings } from "./settings.model";
 import { TUpdateSettingsPayload } from "./settings.types";
 
+import { TableService } from "../table/table.service";
+
 const getSettings = async (): Promise<TSettings> => {
   let settings = await Settings.findOne();
 
@@ -34,6 +36,8 @@ const updateSettings = async (
   Object.assign(settings, payload);
 
   await settings.save();
+
+  await TableService.syncTables(settings.totalTables);
 
   return settings;
 };

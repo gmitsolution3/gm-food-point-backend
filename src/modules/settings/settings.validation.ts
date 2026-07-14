@@ -74,6 +74,8 @@ const updateSettingsSchema = z.object({
         .optional(),
 
       isRestaurantOpen: z.boolean().optional(),
+
+      totalTables: z.number().int().min(1).optional(),
     })
     .strict(),
 });

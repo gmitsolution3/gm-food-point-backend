@@ -93,6 +93,13 @@ export const settingsSchema = new Schema(
       required: true,
       default: DEFAULT_SETTINGS.isRestaurantOpen,
     },
+
+    totalTables: {
+      type: Number,
+      required: true,
+      default: DEFAULT_SETTINGS.totalTables,
+      min: 1,
+    },
   },
   {
     timestamps: true,

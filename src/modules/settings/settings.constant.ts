@@ -32,6 +32,8 @@ export const DEFAULT_SETTINGS = {
   paymentTimeoutMinutes: 10,
 
   isRestaurantOpen: true,
+
+  totalTables: 20
 } as const;
 
 export const CURRENCY_SYMBOL = {

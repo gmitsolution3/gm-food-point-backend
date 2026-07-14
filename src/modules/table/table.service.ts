@@ -8,6 +8,7 @@ import { TABLE_MESSAGES } from "./table.constant";
 import { ETableStatus } from "./table.enum";
 
 import { ClientSession } from "mongoose";
+import { SocketEmitter } from "../../socket/socket.emitter";
 
 const syncTables = async (
   totalTables: number,
@@ -140,6 +141,16 @@ const occupyTable = async (
     session,
   });
 
+  SocketEmitter.tableUpdated({
+    tableNumber: table.tableNumber,
+
+    status: table.status,
+
+    occupiedAt: table.occupiedAt,
+
+    activeOrderId: table.activeOrderId?.toString() ?? null,
+  });
+
   return table;
 };
 
@@ -173,6 +184,16 @@ const releaseTable = async (
 
   await table.save({
     session,
+  });
+
+  SocketEmitter.tableUpdated({
+    tableNumber: table.tableNumber,
+
+    status: table.status,
+
+    occupiedAt: table.occupiedAt,
+
+    activeOrderId: null,
   });
 
   return table;

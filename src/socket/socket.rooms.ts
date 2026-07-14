@@ -4,6 +4,7 @@ export const SOCKET_ROOMS = {
   CASHIER: "cashier",
   KITCHEN: "kitchen",
   MANAGER: "manager",
+  TABLE: "table",
   GLOBAL: "global",
 } as const;
 

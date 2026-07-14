@@ -10,4 +10,6 @@ export const SOCKET_EVENTS = {
   ORDER_COMPLETED: "order:completed",
 
   NOTIFICATION: "notification",
+  
+  TABLE_UPDATED: "table:updated",
 } as const;

@@ -32,3 +32,10 @@ export type TOrderCompletedPayload = {
   orderNumber: number;
   tableNumber: number;
 };
+
+export type TTableUpdatedPayload = {
+  tableNumber: number;
+  status: string;
+  occupiedAt: Date | null;
+  activeOrderId: string | null;
+};

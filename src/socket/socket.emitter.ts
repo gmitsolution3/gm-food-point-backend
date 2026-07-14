@@ -6,6 +6,7 @@ import {
   TOrderCreatedPayload,
   TOrderQueuedPayload,
   TOrderReadyPayload,
+  TTableUpdatedPayload,
 } from "./socket.payload";
 import { SOCKET_ROOMS, getTableRoom } from "./socket.rooms";
 
@@ -101,6 +102,15 @@ export const SocketEmitter = {
     io.to(getTableRoom(payload.tableNumber)).emit(
       SOCKET_EVENTS.NOTIFICATION,
       `Your order no: ${payload.orderNumber} has been completed. Thank you for dining with us! We hope you enjoyed your meal.`,
+    );
+  },
+
+  tableUpdated(payload: TTableUpdatedPayload) {
+    const io = getIO();
+
+    io.to(SOCKET_ROOMS.TABLE).emit(
+      SOCKET_EVENTS.TABLE_UPDATED,
+      payload,
     );
   },
 

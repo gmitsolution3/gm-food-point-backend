@@ -7,10 +7,14 @@ import { Table } from "./table.model";
 import { TABLE_MESSAGES } from "./table.constant";
 import { ETableStatus } from "./table.enum";
 
+import { ClientSession } from "mongoose";
+
 const syncTables = async (
   totalTables: number,
+  session?: ClientSession,
 ): Promise<void> => {
   const currentTables = await Table.find()
+    .session(session ?? null)
     .sort({
       tableNumber: 1,
     })
@@ -41,7 +45,9 @@ const syncTables = async (
       });
     }
 
-    await Table.insertMany(newTables);
+    await Table.insertMany(newTables, {
+      session,
+    });
 
     return;
   }
@@ -67,11 +73,16 @@ const syncTables = async (
   /**
    * Remove extra tables
    */
-  await Table.deleteMany({
-    tableNumber: {
-      $gt: totalTables,
+  await Table.deleteMany(
+    {
+      tableNumber: {
+        $gt: totalTables,
+      },
     },
-  });
+    {
+      session,
+    },
+  );
 };
 
 const getTables = async () => {
@@ -91,17 +102,19 @@ const getTables = async () => {
     .lean();
 };
 
-const occupyTable = async ({
-  tableNumber,
-  orderId,
-}: {
-  tableNumber: number;
-
-  orderId: string;
-}) => {
+const occupyTable = async (
+  {
+    tableNumber,
+    orderId,
+  }: {
+    tableNumber: number;
+    orderId: string;
+  },
+  session?: ClientSession,
+) => {
   const table = await Table.findOne({
     tableNumber,
-  });
+  }).session(session ?? null);
 
   if (!table) {
     throw new AppError(
@@ -123,17 +136,20 @@ const occupyTable = async ({
 
   table.occupiedAt = new Date();
 
-  await table.save();
+  await table.save({
+    session,
+  });
 
   return table;
 };
 
 const releaseTable = async (
   tableNumber: number,
+  session?: ClientSession,
 ) => {
   const table = await Table.findOne({
     tableNumber,
-  });
+  }).session(session ?? null);
 
   if (!table) {
     throw new AppError(
@@ -155,7 +171,9 @@ const releaseTable = async (
 
   table.occupiedAt = null;
 
-  await table.save();
+  await table.save({
+    session,
+  });
 
   return table;
 };

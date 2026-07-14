@@ -18,6 +18,8 @@ import {
 
 import { SocketEmitter } from "../../../socket/socket.emitter";
 
+import { TableService } from "../../table/table.service";
+
 const confirmCashPayment = async ({
   paymentId,
   amountReceived,
@@ -71,6 +73,12 @@ const confirmCashPayment = async ({
     await payment.save({ session });
 
     order.status = EOrderStatus.QUEUED;
+
+    await TableService.occupyTable({
+      tableNumber: order.tableNumber,
+
+      orderId: order._id.toString(),
+    }, session);
 
     await order.save({ session });
 

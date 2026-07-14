@@ -7,6 +7,7 @@ import { PaymentRoutes } from "../modules/payment/payment.route";
 import { SettingsRoutes } from "../modules/settings/settings.route";
 import { UserRoutes } from "../modules/user/user.route";
 import { DashboardRoutes } from "../modules/dashboard/dashboard.route";
+import { TableRoutes } from "../modules/table/table.route";
 
 const router = Router();
 
@@ -41,6 +42,10 @@ const moduleRoutes: {
   {
     path: "/dashboard",
     route: DashboardRoutes,
+  },
+  {
+    path: "/tables",
+    route: TableRoutes,
   },
 ];
 

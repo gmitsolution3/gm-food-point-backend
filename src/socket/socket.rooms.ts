@@ -20,6 +20,9 @@ export const ROLE_ROOM_MAP: Record<
 
   [ESocketRole.MANAGER]:
     SOCKET_ROOMS.MANAGER,
+    
+  [ESocketRole.TABLE]:
+    SOCKET_ROOMS.TABLE,
 };
 
 export const getTableRoom = (tableNumber: number) =>

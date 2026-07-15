@@ -35,9 +35,9 @@ const updateSettings = async (
 
   Object.assign(settings, payload);
 
-  await settings.save();
+  await TableService.syncTables(Number(payload.totalTables) as number);
 
-  await TableService.syncTables(settings.totalTables);
+  await settings.save();
 
   return settings;
 };

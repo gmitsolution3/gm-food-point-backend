@@ -74,17 +74,21 @@ const confirmCashPayment = async ({
 
     order.status = EOrderStatus.QUEUED;
 
-    await TableService.occupyTable({
-      tableNumber: order.tableNumber,
+    const table = await TableService.occupyTable(
+      {
+        tableNumber: order.tableNumber,
 
-      orderId: order._id.toString(),
-    }, session);
+        orderId: order._id.toString(),
+      },
+      session,
+    );
 
     await order.save({ session });
 
     return {
       payment,
       order,
+      table,
     };
   });
 
@@ -93,6 +97,16 @@ const confirmCashPayment = async ({
     orderNumber: result.order.orderNumber,
     tableNumber: result.order.tableNumber,
     estimatedCompletionAt: result.order.estimatedCompletionAt,
+  });
+
+  SocketEmitter.tableUpdated({
+    tableNumber: result.table.tableNumber,
+
+    status: result.table.status,
+
+    occupiedAt: result.table.occupiedAt,
+
+    activeOrderId: result.table.activeOrderId?.toString() ?? null,
   });
 
   return result;
